@@ -130,7 +130,7 @@ void read_string_from_nvs(const char* name ,char* buffer, size_t buffer_size) {
     err = nvs_get_str(nvs_handle, name, buffer, &buffer_size);
     if (err == ESP_ERR_NVS_NOT_FOUND) {
         ESP_LOGW(TAG_STORE, "Key dont found: %s", name);
-    } else {
+    } else if (err != ESP_OK) {
         ESP_LOGE(TAG_STORE, "Error: %s", esp_err_to_name(err));
     }
 

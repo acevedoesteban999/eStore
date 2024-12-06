@@ -100,7 +100,7 @@ void write_string_in_nvs(const char* name, const char* value) {
     close_nvs_handle(nvs_handle);
 }
 
-esp_err_t write_struct_in_nvs(const char* name, const void* value){
+esp_err_t write_struct_in_nvs(const char* name, const void* value,size_t size){
     nvs_handle_t nvs_handle;
 
     esp_err_t err = open_nvs_handle(&nvs_handle);
@@ -108,7 +108,7 @@ esp_err_t write_struct_in_nvs(const char* name, const void* value){
         ESP_LOGE(TAG_STORE, "Error at open NVS: %s", esp_err_to_name(err));
         return err;
     }
-    err = nvs_set_blob(nvs_handle, name, value, sizeof(value));
+    err = nvs_set_blob(nvs_handle, name, value, size);
     if (err == ESP_OK) 
         err = nvs_commit(nvs_handle);
 

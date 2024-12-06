@@ -14,7 +14,6 @@ void write_int8_in_nvs(const char* name, int8_t value);
 void write_uint64_in_nvs(const char* name, uint64_t value);
 void write_float_in_nvs(const char* name, float value);
 void write_string_in_nvs(const char* name, const char* value);
-esp_err_t write_struct_in_nvs(const char *name, const void *value);
-
+esp_err_t write_struct_in_nvs(const char* name, const void* value,size_t size);
 int8_t read_i8_from_nvs(const char* name);
 float read_float_from_nvs(const char* name);

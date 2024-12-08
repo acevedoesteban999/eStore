@@ -100,7 +100,7 @@ void write_string_in_nvs(const char* name, const char* value) {
     close_nvs_handle(nvs_handle);
 }
 
-esp_err_t write_struct_in_nvs(const char* name, const void* value,size_t size){
+esp_err_t write_struct_in_nvs(const char* name, const void* _struct,size_t size){
     nvs_handle_t nvs_handle;
 
     esp_err_t err = open_nvs_handle(&nvs_handle);
@@ -108,13 +108,32 @@ esp_err_t write_struct_in_nvs(const char* name, const void* value,size_t size){
         ESP_LOGE(TAG_STORE, "Error at open NVS: %s", esp_err_to_name(err));
         return err;
     }
-    err = nvs_set_blob(nvs_handle, name, value, size);
+    err = nvs_set_blob(nvs_handle, name, _struct, size);
     if (err == ESP_OK) 
         err = nvs_commit(nvs_handle);
 
     nvs_close(nvs_handle);
     return err;
 
+}
+
+void * read_struct_from_nvs(const char* name , const void * _struct , size_t size) {
+    nvs_handle_t nvs_handle;
+    esp_err_t err;
+    err = open_nvs_handle(&nvs_handle);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG_STORE, "Error at open NVS: %s", esp_err_to_name(err));
+        return;
+    }
+
+    err = nvs_get_blob(nvs_handle, name, _struct, &size);
+    if (err == ESP_ERR_NVS_NOT_FOUND) {
+        ESP_LOGW(TAG_STORE, "Key dont found: %s", name);
+    } else if (err != ESP_OK) {
+        ESP_LOGE(TAG_STORE, "Error: %s", esp_err_to_name(err));
+    }
+
+    nvs_close(nvs_handle);
 }
 
 void read_string_from_nvs(const char* name ,char* buffer, size_t buffer_size) {

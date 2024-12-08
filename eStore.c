@@ -117,7 +117,7 @@ esp_err_t write_struct_in_nvs(const char* name, const void* _struct,size_t size)
 
 }
 
-void * read_struct_from_nvs(const char* name , const void * _struct , size_t size) {
+void read_struct_from_nvs(const char* name , void * _struct , size_t size) {
     nvs_handle_t nvs_handle;
     esp_err_t err;
     err = open_nvs_handle(&nvs_handle);

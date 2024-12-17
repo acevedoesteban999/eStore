@@ -117,23 +117,26 @@ esp_err_t write_struct_in_nvs(const char* name, const void* _struct,size_t size)
 
 }
 
-void read_struct_from_nvs(const char* name , void * _struct , size_t size) {
+bool read_struct_from_nvs(const char* name , void * _struct , size_t size) {
     nvs_handle_t nvs_handle;
     esp_err_t err;
     err = open_nvs_handle(&nvs_handle);
     if (err != ESP_OK) {
         ESP_LOGE(TAG_STORE, "Error at open NVS: %s", esp_err_to_name(err));
-        return;
+        return false;
     }
-
+    bool to_return = true;
     err = nvs_get_blob(nvs_handle, name, _struct, &size);
     if (err == ESP_ERR_NVS_NOT_FOUND) {
         ESP_LOGW(TAG_STORE, "Key dont found: %s", name);
+        to_return = false;
     } else if (err != ESP_OK) {
         ESP_LOGE(TAG_STORE, "Error: %s", esp_err_to_name(err));
+        to_return = false;
     }
 
     nvs_close(nvs_handle);
+    return to_return;
 }
 
 void read_string_from_nvs(const char* name ,char* buffer, size_t buffer_size) {

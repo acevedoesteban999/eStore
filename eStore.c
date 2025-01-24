@@ -117,28 +117,9 @@ bool estore_read_struct(const char* name , void * _struct , size_t size) {
         ESP_LOGE(TAG_STORE, "Error: %s", esp_err_to_name(err));
         to_return = false;
     }
-
+    
     nvs_close(nvs_handle);
     return to_return;
-}
-
-void estore_read_string(const char* name ,char* buffer, size_t buffer_size) {
-    nvs_handle_t nvs_handle;
-    esp_err_t err;
-
-    err = estore_open_nvs(&nvs_handle);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG_STORE, "Error al abrir NVS: %s", esp_err_to_name(err));
-        return;
-    }
-    err = nvs_get_str(nvs_handle, name, buffer, &buffer_size);
-    if (err == ESP_ERR_NVS_NOT_FOUND) {
-        ESP_LOGW(TAG_STORE, "Key dont found: %s", name);
-    } else if (err != ESP_OK) {
-        ESP_LOGE(TAG_STORE, "Error: %s", esp_err_to_name(err));
-    }
-
-    estore_close_nvs(nvs_handle);
 }
 
 int8_t estore_read_i8(const char* name) {
@@ -188,32 +169,6 @@ void estore_write_uint64(const char* name, uint64_t value) {
     estore_close_nvs(nvs_handle);
 }
 
-uint64_t estore_read_uint64(const char* name) {
-    nvs_handle_t nvs_handle;
-    esp_err_t err = estore_open_nvs(&nvs_handle);
-    uint64_t value = 0; 
-    
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG_STORE, "Error at open NVS: %s", esp_err_to_name(err));
-        return 0; 
-    }
-
-    err = nvs_get_u64(nvs_handle, name, &value);
-    estore_close_nvs(nvs_handle);
-
-    switch (err) {
-        case ESP_OK:
-            return value;
-        case ESP_ERR_NVS_NOT_FOUND:
-            ESP_LOGW(TAG_STORE, "Value %s not Found\n",name);
-            break;
-        default:
-            ESP_LOGE(TAG_STORE, "Error at read value: %s", esp_err_to_name(err));
-    }
-    
-    return 0;  
-}
-
 void estore_write_float(const char* name, float value) {
     nvs_handle_t nvs_handle;
     esp_err_t err;
@@ -239,35 +194,116 @@ void estore_write_float(const char* name, float value) {
     estore_close_nvs(nvs_handle);
 }
 
-float estore_read_float(const char* name) {
+bool estore_read_int32(const char* name, int32_t* value) {
     nvs_handle_t nvs_handle;
-    esp_err_t err;
+    esp_err_t err = estore_open_nvs(&nvs_handle);
     
-    err = estore_open_nvs(&nvs_handle);
     if (err != ESP_OK) {
         ESP_LOGE(TAG_STORE, "Error at open NVS: %s", esp_err_to_name(err));
-        return 0.0; 
+        return false;
     }
 
-    uint32_t value_as_int = 0;
-
-    err = nvs_get_u32(nvs_handle, name, &value_as_int);
-    if (err == ESP_ERR_NVS_NOT_FOUND) {
-        ESP_LOGW(TAG_STORE, "Value not found: %s", name);
-        estore_close_nvs(nvs_handle);
-        return 0.0;  
-    } else if (err != ESP_OK) {
-        ESP_LOGE(TAG_STORE, "Error at Read: %s", esp_err_to_name(err));
-        estore_close_nvs(nvs_handle);
-        return 0.0; 
-    }
-
-    float value;
-    memcpy(&value, &value_as_int, sizeof(value));
-
+    err = nvs_get_i32(nvs_handle, name, value);
     estore_close_nvs(nvs_handle);
 
+    if (err == ESP_OK) return true;
     
-    return value;
+    if (err == ESP_ERR_NVS_NOT_FOUND)
+        ESP_LOGW(TAG_STORE, "Value %s not Found\n", name);
+    else
+        ESP_LOGE(TAG_STORE, "Error at read value: %s", esp_err_to_name(err));
+    
+    return false;
+}
+
+bool estore_read_int8(const char* name, int8_t* value) {
+    nvs_handle_t nvs_handle;
+    esp_err_t err = estore_open_nvs(&nvs_handle);
+    
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG_STORE, "Error at open NVS: %s", esp_err_to_name(err));
+        return false;
+    }
+    err = nvs_get_i8(nvs_handle, name, value);
+    estore_close_nvs(nvs_handle);
+
+    if (err == ESP_OK) return true;
+    
+    if (err == ESP_ERR_NVS_NOT_FOUND)
+        ESP_LOGW(TAG_STORE, "Value %s not Found\n", name);
+    else
+        ESP_LOGE(TAG_STORE, "Error at read value: %s", esp_err_to_name(err));
+    
+    return false;
+}
+
+bool estore_read_uint64(const char* name, uint64_t* value) {
+    nvs_handle_t nvs_handle;
+    esp_err_t err = estore_open_nvs(&nvs_handle);
+    
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG_STORE, "Error at open NVS: %s", esp_err_to_name(err));
+        return false;
+    }
+
+    err = nvs_get_u64(nvs_handle, name, value);
+    estore_close_nvs(nvs_handle);
+
+    if (err == ESP_OK) return true;
+
+    if (err == ESP_ERR_NVS_NOT_FOUND)
+        ESP_LOGW(TAG_STORE, "Value %s not Found\n", name);
+    else
+        ESP_LOGE(TAG_STORE, "Error at read value: %s", esp_err_to_name(err));
+    
+    return false;
+}
+
+bool estore_read_float(const char* name, float* value) {
+    nvs_handle_t nvs_handle;
+    esp_err_t err = estore_open_nvs(&nvs_handle);
+    
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG_STORE, "Error at open NVS: %s", esp_err_to_name(err));
+        return false;
+    }
+
+    uint32_t value_as_int;
+    err = nvs_get_u32(nvs_handle, name, &value_as_int);
+    estore_close_nvs(nvs_handle);
+
+    if (err == ESP_OK) {
+        memcpy(value, &value_as_int, sizeof(value_as_int));
+        return true;
+    }
+    
+    if (err == ESP_ERR_NVS_NOT_FOUND)
+        ESP_LOGW(TAG_STORE, "Value not found: %s", name);
+    else
+        ESP_LOGE(TAG_STORE, "Error at Read: %s", esp_err_to_name(err));
+    
+    return false;
+}
+
+bool estore_read_string(const char* name, char* buffer, size_t buffer_size) {
+    nvs_handle_t nvs_handle;
+    esp_err_t err = estore_open_nvs(&nvs_handle);
+
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG_STORE, "Error at open NVS: %s", esp_err_to_name(err));
+        return false;
+    }
+
+    err = nvs_get_str(nvs_handle, name, buffer, &buffer_size);
+    estore_close_nvs(nvs_handle);
+
+    if (err == ESP_OK) return true;
+
+    if (err == ESP_ERR_NVS_NOT_FOUND)
+        ESP_LOGW(TAG_STORE, "Key dont found: %s", name);
+    else
+        ESP_LOGE(TAG_STORE, "Error: %s", esp_err_to_name(err));
+
+    return false;
 }
 

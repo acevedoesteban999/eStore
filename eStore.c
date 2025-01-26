@@ -62,6 +62,27 @@ void estore_write_int8(const char* name, int8_t value) {
     estore_close_nvs(nvs_handle);
 }
 
+void estore_write_int32(const char* name, int32_t value) {
+    nvs_handle_t nvs_handle;
+    
+    esp_err_t err = estore_open_nvs(&nvs_handle);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG_STORE, "Error at open NVS: %s", esp_err_to_name(err));
+        return;
+    }
+
+    err = nvs_set_i32(nvs_handle, name, value);
+    if (err != ESP_OK)
+        ESP_LOGE(TAG_STORE, "Error at Save: %s", esp_err_to_name(err));
+    else {
+        err = nvs_commit(nvs_handle);
+        if (err != ESP_OK)
+            ESP_LOGE(TAG_STORE, "Error in Commit: %s", esp_err_to_name(err));
+    }
+    
+    estore_close_nvs(nvs_handle);
+}
+
 void estore_write_string(const char* name, const char* value) {
     nvs_handle_t nvs_handle;
 

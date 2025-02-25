@@ -143,32 +143,6 @@ bool estore_read_struct(const char* name , void * _struct , size_t size) {
     return to_return;
 }
 
-int8_t estore_read_i8(const char* name) {
-    nvs_handle_t nvs_handle;
-    esp_err_t err = estore_open_nvs(&nvs_handle);
-    int8_t value = 0; 
-    
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG_STORE, "Error at open NVS: %s", esp_err_to_name(err));
-        return 0;  
-    }
-
-    err = nvs_get_i8(nvs_handle, name, &value);
-    estore_close_nvs(nvs_handle);
-
-    switch (err) {
-        case ESP_OK:
-            return value;
-        case ESP_ERR_NVS_NOT_FOUND:
-            ESP_LOGW(TAG_STORE, "Value %s not Found\n",name);
-            break;
-        default:
-            ESP_LOGE(TAG_STORE, "Error at read value: %s", esp_err_to_name(err));
-    }
-    
-    return 0;  
-}
-
 void estore_write_uint64(const char* name, uint64_t value) {
     nvs_handle_t nvs_handle;
     
@@ -328,3 +302,18 @@ bool estore_read_string(const char* name, char* buffer, size_t buffer_size) {
     return false;
 }
 
+void estore_read_or_write_struct(const char* _name , void * _struct , size_t size , void * _default){
+    if(!estore_read_struct(_name,_struct,size)){
+        _struct = _default;
+        estore_write_struct(_name,_struct,size);
+    }
+
+}
+
+
+void estore_read_or_write_int8(const char* _name , int8_t* _value , int8_t _default){
+    if(!estore_read_int8(_name,_value)){
+        *_value = _default;
+        estore_write_int8(_name,*_value);
+    }
+}

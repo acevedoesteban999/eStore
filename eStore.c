@@ -302,18 +302,22 @@ bool estore_read_string(const char* name, char* buffer, size_t buffer_size) {
     return false;
 }
 
-void estore_read_or_write_struct(const char* _name , void * _struct , size_t size , void * _default){
+bool estore_read_or_write_struct(const char* _name , void * _struct , size_t size , void * _default){
     if(!estore_read_struct(_name,_struct,size)){
         _struct = _default;
         estore_write_struct(_name,_struct,size);
+        return false;
     }
+    return true;
 
 }
 
 
-void estore_read_or_write_int8(const char* _name , int8_t* _value , int8_t _default){
+bool estore_read_or_write_int8(const char* _name , int8_t* _value , int8_t _default){
     if(!estore_read_int8(_name,_value)){
         *_value = _default;
         estore_write_int8(_name,*_value);
+        return false;
     }
+    return true;
 }

@@ -115,7 +115,8 @@ esp_err_t estore_write_struct(const char* name, const void* _struct,size_t size)
     err = nvs_set_blob(nvs_handle, name, _struct, size);
     if (err == ESP_OK) 
         err = nvs_commit(nvs_handle);
-
+    else
+        ESP_LOGE(TAG_STORE, "Error at write struct: %s", esp_err_to_name(err));
     nvs_close(nvs_handle);
     return err;
 

@@ -32,6 +32,16 @@ The eStore module is an implementation for handling non-volatile storage (NVS) o
 ```c
 #include "eStore.h"
 
+#define DEFAULT_STRUCT1 (struct1) { \
+    .var1 = 1, \
+    .var2 = 2, \
+}
+
+typedef struct{
+    int var1;
+    int var2;
+}struct1;
+
 void app_main() {
     // Initialize NVS
     estore_init();
@@ -50,4 +60,8 @@ void app_main() {
     char buffer[20];
     estore_read_string("example_string", buffer, sizeof(buffer));
     printf("Read string value: %s\n", buffer);
+
+    // Read or Write default 
+    struct1 stc1;
+    estore_read_or_write_struct('example_rw',&stc1,sizeof(stc1),&DEFAULT_STRUCT1)
 }
